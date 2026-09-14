@@ -5,6 +5,7 @@ import { set } from "react-hook-form";
 import ProgressBar from "@/components/progressBar";
 import { ChevronLeft, X } from "lucide-react";
 import ResultCard from "./ResultCard";
+import QuizSubmission from "./QuizSubmission";
 
 const questions = [
     {
@@ -69,6 +70,7 @@ export default function Home() {
     const [score, setScore] = useState<number>(0);
     const [selectedAnswer, setSelectedAnswer] = useState < number | null > (null);
     const[isCorrect,  setIsCorrect] = useState<boolean | null>(null);
+    const [submitted, setSubmitted] = useState<boolean>(false);
 
     const handleNext =() =>{
         if(!started){
@@ -77,6 +79,9 @@ export default function Home() {
         }
         if (currentQuestion < questions.length-1){
             setCurrentQuestion(currentQuestion + 1);
+        }else{
+            setSubmitted(true);
+            return;
         }
         setSelectedAnswer(null);
         setIsCorrect(null);
@@ -89,6 +94,18 @@ export default function Home() {
             setScore(score + 1);
         }
         setIsCorrect(isCurrentCorrect);
+    }
+
+    const scorePercentage: number =  Math.round((score / questions.length) * 100);
+
+    if(submitted){
+        return (
+            <QuizSubmission 
+                score={score}
+                scorePercentage={scorePercentage}
+                totalQuestions={questions.length}
+            />
+        )
     }
 
   return (
@@ -135,7 +152,8 @@ export default function Home() {
         <footer className="footer pb-10 px-8 relative mb-1">
           <ResultCard isCorrect ={isCorrect} 
           correctAnswer={questions[currentQuestion].answers.find(answer => answer.isCorrect === true)?.answerText}/>
-          <Button variant ="neo" size="lg" onClick={handleNext}> {!started ? 'Start': 'Next'} </Button>
+          <Button variant ="neo" size="lg" onClick={handleNext}> {!started ? 'Start': (currentQuestion === questions.length -1 ) ? 
+          'Submit': 'Next'} </Button>
         </footer>
     </div>
   )
