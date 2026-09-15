@@ -7,6 +7,8 @@ import { ChevronLeft, X } from "lucide-react";
 import ResultCard from "./ResultCard";
 import QuizSubmission from "./QuizSubmission";
 
+
+
 const questions = [
     {
         questionText: "What is React?",
@@ -73,7 +75,11 @@ export default function Home() {
     const [submitted, setSubmitted] = useState<boolean>(false);
 
     const handleNext =() =>{
+        console.log("START/NEXT BUTTON CLICKED");
+        console.log("started before:", started);
+
         if(!started){
+            console.log("setting started to true");
             setStarted(true);
             return;
         }

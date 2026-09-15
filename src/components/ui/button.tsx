@@ -50,29 +50,41 @@ export interface ButtonProps
 }
 
 export const spanVariants = cva(
-  ["absolute", "h-14", "bottom-[-7px]", "w-full",
-    "border-2", "left-0", "z-0"], {
-      variants: {
-        variant: {
-          default: "hidden",
-          destructive:
-            "hidden",
-          outline:
-            "hidden",
-          secondary:
-            "hidden",
-          ghost: "hidden",
-          link: "hidden",
-          neo: "border-blue-900 bg-primary-shadow",
-          neoOutline: "bg-[#6366a7 border-[#6366F6]", 
-          neoSuccess: "bg-green-500 bg-green-600",
-          neoDanger: "bg-red-500 bg-red-600",
-        },
+  [
+    "absolute",
+    "h-14",
+    "bottom-[-7px]",
+    "w-full",
+    "border-2",
+    "left-0",
+    "z-0",
+  ],
+  {
+    variants: {
+      variant: {
+        default: "hidden",
+        destructive: "hidden",
+        outline: "hidden",
+        secondary: "hidden",
+        ghost: "hidden",
+        link: "hidden",
+
+        neo: "border-blue-900 bg-primary-shadow",
+
+        neoOutline:
+          "bg-[#6366a7] border-[#6366F6]",
+
+        neoSuccess:
+          "bg-green-600 border-green-600",
+
+        neoDanger:
+          "bg-red-600 border-red-600",
       },
-      defaultVariants:{
-        variant: "default",
-      }
-    }
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
 )
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
