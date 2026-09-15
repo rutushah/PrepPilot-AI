@@ -13,6 +13,7 @@ const UploadDoc = () => {
             console.log(document);
         }
     
+        
     return (
         <div className="w-full">
             <form className="w-full" onSubmit={handleSubmit}>
