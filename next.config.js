@@ -10,6 +10,12 @@ const nextConfig = {
       },
     ],
   },
+  experimental: {
+    serverComponentsExternalPackages: [
+      "@langchain/community",
+      "pdf-parse",
+    ],
+  },
 };
 
 module.exports = nextConfig;

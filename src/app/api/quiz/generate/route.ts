@@ -1,7 +1,9 @@
 import {NextRequest, NextResponse} from "next/server";
 import { ChatOpenAI } from "@langchain/openai";
 import { HumanMessage } from '@langchain/core/messages';
-import { PDFLoader} from "langchain/document_loaders/fs/pdf"; 
+import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
+import { ChatGroq } from "@langchain/groq";
+import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 
 export async function POST(req: NextRequest){
     const body = await req.formData();
@@ -19,15 +21,42 @@ export async function POST(req: NextRequest){
 
         const prompt = "given the text which is a summary of the document, generate a quiz based on the text. Return json only that contains a quiz object with fields: name, description and questions. The questions is an array of objecs with fields: questionText, answers. The answers is an array of objects with fields : answerText, isCorrect."
 
-        if (!process.env.OPENAI_API_KEY){
+        const provider = "google" as "google" | "openai" | "groq";
+
+        if (provider === "openai" && !process.env.OPENAI_API_KEY) {
             return NextResponse.json(
                 {error: "Open AI API Key is not provided"},
                 {status: 500}
             ) 
         }
-        const model = new ChatOpenAI({
-            openAIApiKey: process.env.OPENAI_API_KEY,
-            modelName: "gpt-4o-mini",
+        if (provider === "groq" && !process.env.GROQ_API_KEY) {
+            return NextResponse.json(
+                {error: "Groq API Key is not provided"},
+                {status: 500}
+            )
+        }
+
+        if (provider === "google" && !process.env.GOOGLE_API_KEY) {
+            return NextResponse.json(
+                {error: "Google API Key is not provided"},
+                {status: 500}
+            )
+        }
+        //commenting openai
+        // const model = new ChatOpenAI({
+        //     openAIApiKey: process.env.OPENAI_API_KEY,
+        //     modelName: "gpt-5-nano",
+        // });
+
+        //using groq model for testing
+        const groqModel = new ChatGroq({
+            apiKey: process.env.GROQ_API_KEY, 
+            model: "meta-llama/llama-4-scout-17b-16e-instruct",
+          });
+
+        const googleModel = new ChatGoogleGenerativeAI({
+            apiKey: process.env.GOOGLE_API_KEY,
+            model: "gemini-3.5-flash",
         });
 
         const message = new HumanMessage({
@@ -39,7 +68,7 @@ export async function POST(req: NextRequest){
             ]
         })
 
-        const result = await model.invoke([message]);
+        const result = await googleModel.invoke([message]);
         console.log(result);
 
         return NextResponse.json(
