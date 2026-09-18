@@ -1,11 +1,13 @@
 "use client"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { useRouter } from "next/navigation"
 
 const UploadDoc = () => {
     const [document, setDocument] = useState<Blob | File | null |undefined> (null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const[error, setError] = useState<String> ("");
+    const router = useRouter();
 
     const handleSubmit =  
         async (e: React.FormEvent<HTMLFormElement>) =>{
@@ -25,6 +27,9 @@ const UploadDoc = () => {
                 });
                 if (res.status == 200){
                     console.log("Quiz Created Successfully");
+                    const data = await res.json();
+                    const quizId = data.quizId;
+                    router.push(`/quiz/${quizId}`)
                 }
             }catch(e){
                    console.log("Error while creating quiz", e); 
@@ -35,7 +40,7 @@ const UploadDoc = () => {
         
     return (
         <div className="w-full">
-            <form className="w-full" onSubmit={handleSubmit}>
+           { isLoading ? <p>Loading...</p> :  <form className="w-full" onSubmit={handleSubmit}>
                 <label htmlFor="document" 
                 className="bg-secondary w-full flex h-20 
                 rounded-md border-4 border-dashed 
@@ -50,7 +55,7 @@ const UploadDoc = () => {
                 </label>
                 {error ? <p className="text-red-500">{error}</p> : null}
                 <Button size="lg" className="mt-2" type="submit"> Generate Quiz</Button>
-            </form>
+            </form>}
         </div>
     )
 }
