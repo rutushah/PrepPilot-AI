@@ -6,6 +6,7 @@ import { ChatGroq } from "@langchain/groq";
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { z } from "zod";
 import { desc } from "drizzle-orm";
+import saveQuiz from "./saveToDb";
 
 
 export async function POST(req: NextRequest){
@@ -94,10 +95,12 @@ export async function POST(req: NextRequest){
         const result = await runnable.invoke([message]);
         console.log("Generated Quiz", result);
 
+        const {quizId} = await saveQuiz(result.quiz)
+
         return NextResponse.json(
             {
                 message : "Quiz Created Successfully",
-                quiz: result.quiz
+                quizId
             },
             {
                 status: 200
