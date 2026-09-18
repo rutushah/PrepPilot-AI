@@ -4,6 +4,9 @@ import { HumanMessage } from '@langchain/core/messages';
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { ChatGroq } from "@langchain/groq";
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
+import { z } from "zod";
+import { desc } from "drizzle-orm";
+
 
 export async function POST(req: NextRequest){
     const body = await req.formData();
@@ -49,16 +52,36 @@ export async function POST(req: NextRequest){
         // });
 
         //using groq model for testing
-        const groqModel = new ChatGroq({
-            apiKey: process.env.GROQ_API_KEY, 
-            model: "meta-llama/llama-4-scout-17b-16e-instruct",
-          });
+        // const groqModel = new ChatGroq({
+        //     apiKey: process.env.GROQ_API_KEY, 
+        //     model: "meta-llama/llama-4-scout-17b-16e-instruct",
+        //   });
 
         const googleModel = new ChatGoogleGenerativeAI({
             apiKey: process.env.GOOGLE_API_KEY,
             model: "gemini-3.5-flash",
         });
 
+        const quizSchema = z.object({
+            quiz: z.object({
+                name: z.string(),
+                description: z.string(),
+                questions: z.array(
+                    z.object({
+                        questionText :  z.string(),
+                        answers: z.array(
+                            z.object({
+                                answerText: z.string(),
+                                isCorrect: z.boolean(),
+                            })
+                        ),
+                    })
+                ),
+            }),
+        })
+
+        const runnable = googleModel.withStructuredOutput(quizSchema);
+   
         const message = new HumanMessage({
             content:[
                 {
@@ -68,12 +91,13 @@ export async function POST(req: NextRequest){
             ]
         })
 
-        const result = await googleModel.invoke([message]);
-        console.log(result);
+        const result = await runnable.invoke([message]);
+        console.log("Generated Quiz", result);
 
         return NextResponse.json(
             {
-                message : "Quiz Created Successfully"
+                message : "Quiz Created Successfully",
+                quiz: result.quiz
             },
             {
                 status: 200

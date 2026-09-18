@@ -93,7 +93,13 @@ export default function Home() {
         setIsCorrect(null);
     }
 
-    const handleAnswer = (answer) => {
+    type Answer = {
+        id:number;
+        answerText: string;
+        isCorrect: boolean;
+    }
+
+    const handleAnswer = (answer: Answer) => {
         setSelectedAnswer(answer.id);
         const isCurrentCorrect = answer.isCorrect;
         if  (isCurrentCorrect){
@@ -156,8 +162,11 @@ export default function Home() {
           )}
         </main>
         <footer className="footer pb-10 px-8 relative mb-1">
-          <ResultCard isCorrect ={isCorrect} 
-          correctAnswer={questions[currentQuestion].answers.find(answer => answer.isCorrect === true)?.answerText}/>
+          <ResultCard 
+          isCorrect ={isCorrect} 
+          correctAnswer={
+            questions[currentQuestion].answers.find(
+                answer => answer.isCorrect===true)?.answerText ?? "No correct answer available"}/>
           <Button variant ="neo" size="lg" onClick={handleNext}> {!started ? 'Start': (currentQuestion === questions.length -1 ) ? 
           'Submit': 'Next'} </Button>
         </footer>
