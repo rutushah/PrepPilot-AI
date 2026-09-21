@@ -47,10 +47,10 @@ export async function POST(req: NextRequest){
             )
         }
         //commenting openai
-        // const model = new ChatOpenAI({
-        //     openAIApiKey: process.env.OPENAI_API_KEY,
-        //     modelName: "gpt-5-nano",
-        // });
+        const openAIModel = new ChatOpenAI({
+            openAIApiKey: process.env.OPENAI_API_KEY,
+            modelName: "gpt-5-nano",
+        });
 
         //using groq model for testing
         // const groqModel = new ChatGroq({
@@ -58,10 +58,10 @@ export async function POST(req: NextRequest){
         //     model: "meta-llama/llama-4-scout-17b-16e-instruct",
         //   });
 
-        const googleModel = new ChatGoogleGenerativeAI({
-            apiKey: process.env.GOOGLE_API_KEY,
-            model: "gemini-3.5-flash",
-        });
+        // const googleModel = new ChatGoogleGenerativeAI({
+        //     apiKey: process.env.GOOGLE_API_KEY,
+        //     model: "gemini-3.5-flash",
+        // });
 
         const quizSchema = z.object({
             quiz: z.object({
@@ -81,7 +81,7 @@ export async function POST(req: NextRequest){
             }),
         })
 
-        const runnable = googleModel.withStructuredOutput(quizSchema);
+        const runnable = openAIModel.withStructuredOutput(quizSchema);
    
         const message = new HumanMessage({
             content:[
