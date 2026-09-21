@@ -8,6 +8,7 @@ import ResultCard from "../ResultCard";
 import QuizSubmission from "../QuizSubmission";
 import { InferSelectModel } from "drizzle-orm";
 import {quiz, questions as DbQuestions, questionAnswers} from "@/db/schema";
+import { useRouter } from "next/navigation";
 
 type Answer = InferSelectModel<typeof questionAnswers>
 type Question = InferSelectModel<typeof DbQuestions> & {answers: Answer[]};
@@ -81,9 +82,12 @@ export default function QuizQuestions(props:Props) {
     const [started, setStarted] = useState<boolean>(false);
     const [currentQuestion, setCurrentQuestion] = useState<number>(0);
     const [score, setScore] = useState<number>(0);
-    const [selectedAnswer, setSelectedAnswer] = useState < number | null > (null);
-    const[isCorrect,  setIsCorrect] = useState<boolean | null>(null);
+    // const [selectedAnswer, setSelectedAnswer] = useState < number | null > (null);
+    // const[isCorrect,  setIsCorrect] = useState<boolean | null>(null);
     const [submitted, setSubmitted] = useState<boolean>(false);
+    const[userAnswers, setUserAnswers] = useState<{questionId: number, answerId: number}[]>([])
+    const router = useRouter();
+
 
     const handleNext =() =>{
         console.log("START/NEXT BUTTON CLICKED");
@@ -100,21 +104,47 @@ export default function QuizQuestions(props:Props) {
             setSubmitted(true);
             return;
         }
-        setSelectedAnswer(null);
-        setIsCorrect(null);
+        // setSelectedAnswer(null);
+        // setIsCorrect(null);
     }
 
 
-    const handleAnswer = (answer: Answer) => {
-        setSelectedAnswer(answer.id);
+    const handleAnswer = (answer: Answer, questionId:number) => {
+        // setSelectedAnswer(answer.id); 
+
+        const newUserAnswerArr = [...userAnswers,{
+            answerId: answer.id,
+            questionId        
+        }]
+        setUserAnswers(newUserAnswerArr);
+
         const isCurrentCorrect = answer.isCorrect;
         if  (isCurrentCorrect){
             setScore(score + 1);
         }
-        setIsCorrect(isCurrentCorrect);
+        // setIsCorrect(isCurrentCorrect);
+    }
+
+    const handlePressPrev = () => {
+        if(currentQuestion !==0){
+            setCurrentQuestion(prevCurrentQuestion => 
+                prevCurrentQuestion - 1
+            )
+        }
+    }
+
+
+    const handleExit = () => {
+        router.push('/dashboard')
     }
 
     const scorePercentage: number =  Math.round((score / questions.length) * 100);
+    const selectedAnswer: number | null | undefined = 
+    userAnswers.find((item) => item.questionId === questions[currentQuestion].id)?.answerId;
+    const isCorrect : boolean | null | undefined =  questions[currentQuestion].answers.findIndex(
+        (answer) => answer.id === selectedAnswer
+    ) ? questions[currentQuestion].answers.find(
+        (answer) => answer.id === selectedAnswer)?.isCorrect : null;
 
     if(submitted){
         return (
@@ -128,16 +158,18 @@ export default function QuizQuestions(props:Props) {
 
   return (
     <div className="flex flex-col flex-1">
-        <div className="position-sticky top-0 z-10 shadow-md py-4 w-full">
+        <div className="sticky top-0 z-10 shadow-md py-4 w-full">
             <header className="grid grid-cols-[auto,1fr,auto] 
             grid-flow-col items-center justify-between py-2
             gap-2">
-                <Button size="icon" variant="outline"> <ChevronLeft/> </Button>
+                <Button size="icon" variant="outline"
+                onClick={handlePressPrev}> <ChevronLeft/> </Button>
                 <ProgressBar value={(currentQuestion / questions.length) * 100} ></ProgressBar>
-                <Button size="icon" variant="outline"> <X/> </Button>
+                <Button size="icon" variant="outline"
+                onClick={handleExit}> <X/> </Button>
             </header>
         </div>
-        <main className="flex justify-center flext-1">
+        <main className="flex justify-center flex-1">
           {!started ? <h1 className="text-3xl font-bold">Welcome to the quiz Page 👋</h1> : (
             <div>
                 <h2 className="text-3xl font-bold"> {questions[currentQuestion].questionText} </h2>
@@ -152,8 +184,12 @@ export default function QuizQuestions(props:Props) {
                                 : "neoDanger"
                             : "neoOutline";
                             return(
-                                <Button key={answer.id} variant={variant} size ="xl"
-                                onClick={() => handleAnswer(answer)}> 
+                                <Button key={answer.id} 
+                                disabled={!!selectedAnswer}
+                                variant={variant} size ="xl"
+                                onClick={() => handleAnswer(answer,
+                                    questions[currentQuestion].id)}
+                                className="disabled:opacity-100"> 
                                     <p className="whitespace-normal">
                                         {answer.answerText}
                                     </p>
