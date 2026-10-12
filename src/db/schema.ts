@@ -23,6 +23,12 @@ export const users = pgTable("user", {
     image: text("image"),
   })
 
+  export const usersRelations = relations(users, ({many}) => ({
+    quizzes: many(quiz),
+
+
+  }))
+
   export const accounts = pgTable(
     "account",
     {
@@ -78,7 +84,7 @@ export const quiz = pgTable("quizzes", {
     id: serial("id").primaryKey(),
     name: text("name"),
     description: text("description"),
-    userId : text("user_id"),
+    userId : text("user_id").references(() => users.id),
 });
 
 export const quizRelations = relations(quiz, ({many, one}) => ({
